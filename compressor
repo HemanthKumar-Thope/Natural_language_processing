@@ -1,0 +1,52 @@
+This has been a sample implementation of compressing the text from webpages. There are multiple codes which are online that are actually very good implementations, here we have brought down a very simple functionality.  
+
+
+
+#importing all the necessary libraries
+import nltk
+from bs4 import BeautifulSoup
+import urllib
+import urllib.request
+import nltk
+from bs4 import BeautifulSoup
+import urllib
+import urllib.request
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from heapq import nlargest
+
+from string import punctuation
+from nltk.probability import FreqDist
+from collections import defaultdict
+
+
+#importing the html docs which needs to be compressed
+articleURL = "https://www.washingtonpost.com/politics/2019/06/27/transcript-night-one-first-democratic-debate-annotated/?utm_term=.a1453985ed4a"
+
+
+#preprocessing the html page
+
+page = urllib.request.urlopen(articleURL).read()
+soup = BeautifulSoup(page, "lxml")
+text = ' '.join(map(lambda p : p.text, soup.find_all('article')))
+output1 = text.replace("?"," ").encode('ascii', errors = 'replace')
+output2 = str(output1)
+output2.replace("?"," ")
+
+
+
+# pulling the details from the embibed function
+
+def summarize(output2, n):
+    sents = sent_tokenize(output2)
+    words = word_tokenize(output2.lower())
+    stop_words = set(stopwords.words('english') + list(punctuation))
+    words_sent = [i for i in words if i not in stop_words]
+    freq = FreqDist(words_sent)
+    ranking = defaultdict(int)
+    for i,j in enumerate(sents):
+        for w in word_tokenize(j):
+            if w in freq:
+                ranking[i] += freq[w]
+    sents_isx = nlargest(n,ranking,key = ranking.get)
+    return [sents[j] for j in sorted(sents_isx)]
